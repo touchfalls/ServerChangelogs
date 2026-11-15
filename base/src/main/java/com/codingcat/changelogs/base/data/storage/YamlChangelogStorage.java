@@ -25,7 +25,7 @@ public class YamlChangelogStorage implements ChangelogStorage {
     private Map<UUID, Instant> playerFirstSeen;
 
     @Override
-    public void init() {
+    public synchronized void init() {
         if (!filePath.toFile().exists()) {
             this.cache = new ArrayList<>();
             this.playerFirstSeen = new HashMap<>();
@@ -47,19 +47,19 @@ public class YamlChangelogStorage implements ChangelogStorage {
     }
 
     @Override
-    public void storeEntry(@NotNull ChangelogEntry entry) {
+    public synchronized void storeEntry(@NotNull ChangelogEntry entry) {
         this.cache.add(entry.uid(), entry);
         this.save();
     }
 
     @Override
-    public void updateEntry(@NotNull ChangelogEntry entry) {
+    public synchronized void updateEntry(@NotNull ChangelogEntry entry) {
         this.cache.set(entry.uid(), entry);
         this.save();
     }
 
     @Override
-    public boolean removeEntry(int uid) {
+    public synchronized boolean removeEntry(int uid) {
         boolean success = this.cache.removeIf(e -> e.uid() == uid);
         if (success) {
             this.fixEntryUIDs();
@@ -157,12 +157,13 @@ public class YamlChangelogStorage implements ChangelogStorage {
     }
 
     @Override
-    public @NotNull List<ChangelogEntry> listEntries() {
-        return this.cache;
+    public synchronized @NotNull List<ChangelogEntry> listEntries() {
+        // A copy, since callers iterate it outside of the lock
+        return List.copyOf(this.cache);
     }
 
     @Override
-    public @Nullable ChangelogEntry getByUID(int uid) {
+    public synchronized @Nullable ChangelogEntry getByUID(int uid) {
         try {
             return this.cache.get(uid);
         } catch (IndexOutOfBoundsException _) {
@@ -171,27 +172,31 @@ public class YamlChangelogStorage implements ChangelogStorage {
     }
 
     @Override
-    public void markAsRead(int uid, @NotNull UUID player) {
-        this.cache.stream()
-                .filter(e -> e.uid() == uid)
-                .forEach(e -> e.playersRead().add(player));
+    public synchronized void markAsRead(int uid, @NotNull UUID player) {
+        // Replace instead of mutating, so sets handed out by listEntries() are never changed by another thread
+        this.cache.replaceAll(e -> {
+            if (e.uid() != uid) return e;
+            Set<UUID> playersRead = new HashSet<>(e.playersRead());
+            playersRead.add(player);
+            return new ChangelogEntry(e.uid(), e.lines(), e.recordedAt(), e.author(), playersRead);
+        });
         this.save();
     }
 
     @Override
-    public @Nullable Instant getFirstSeenAt(@NotNull UUID player) {
+    public synchronized @Nullable Instant getFirstSeenAt(@NotNull UUID player) {
         return this.playerFirstSeen.get(player);
     }
 
     @Override
-    public @NotNull Instant recordFirstSeen(@NotNull UUID player, @NotNull Instant seenAt) {
+    public synchronized @NotNull Instant recordFirstSeen(@NotNull UUID player, @NotNull Instant seenAt) {
         Instant previous = this.playerFirstSeen.putIfAbsent(player, seenAt);
         if (previous == null) this.save();
         return Objects.requireNonNullElse(previous, seenAt);
     }
 
     @Override
-    public int nextUID() {
+    public synchronized int nextUID() {
         return this.cache.size();
     }
 
