@@ -2,7 +2,7 @@
 # ---- ServerChangelogs by codingcat2468 ----
 # Translation files can be found in the "lang" directory.
 # The language shown to the player is automatically determined by
-# paper/adventure based on the selected language of the client.
+# adventure based on the selected language of the client.
 #
 
 # The changelog storage is used to store all server changelogs.
@@ -31,11 +31,9 @@ date_timezone: "UTC"
 register_dedicated_command: true
 
 # Whether to use the native fallback permission system of the current platform.
-# On regular paper servers, this will use the vanilla OP system instead of
-# permissions provided by bukkit/a plugin like LuckPerms.
-# NOTE: This is not supported on platforms that do not have such a native
-# system, and instead rely on permissions only (like Velocity)!
-# Changing this setting requires a restart of your server.
+# This will use the vanilla OP system instead of permissions provided by
+# bukkit (Paper) or fabric-permissions-api (Fabric), e.g. through LuckPerms.
+# NOTE: Changing this setting requires a restart of your server!
 use_native_fallback_permissions: false
 
 # The connection phase in which the dialog will be sent.

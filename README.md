@@ -29,13 +29,20 @@ Currently, the plugin supports the following features:
 - Customizable **translations** based on the player's **client language**
 
 ## Supported Server Software & Versions
-This is a **Fabric** port of [ServerChangelogs](https://github.com/codingcat2468/ServerChangelogs). It is a **server-side only** mod, so vanilla clients can join without installing anything.
-It is built against **Minecraft 26.2** and relies on the vanilla dialog system, which does not exist before `1.21.6`.
+ServerChangelogs is currently available as:
+- a **Paper** plugin (runs on **Paper** servers, including forks like **Purpur** etc.)
+- a **Fabric** mod (**server-side only**, so vanilla clients can join without installing anything)
+
+Both are built against **Minecraft 26.2** and use the vanilla dialog system directly, which does not exist before `1.21.6`.
+Velocity is no longer supported, since a proxy has no vanilla classes to build dialogs with.
+
+In case something does break, let me know and [create an issue](https://github.com/codingcat2468/ServerChangelogs/issues/new), and I **might** be able to take a look at it!
 
 ## Installation
-Requires [Fabric API](https://modrinth.com/mod/fabric-api). Drop the mod jar into your `mods` folder and restart your server.
-The mod generates its config files in `config/ServerChangelogs`.
-Permissions are checked through [fabric-permissions-api](https://github.com/lucko/fabric-permissions-api) (works with e.g. LuckPerms); alternatively set `use_native_fallback_permissions: true` to use vanilla operators.
+- **Paper**: copy the plugin jar into your `plugins` folder and **restart your server**. The config files are generated in `plugins/ServerChangelogs`.
+- **Fabric**: requires [Fabric API](https://modrinth.com/mod/fabric-api). Copy the mod jar into your `mods` folder and **restart your server**. The config files are generated in `config/ServerChangelogs`.
+
+Permissions are checked through Bukkit permissions on Paper and [fabric-permissions-api](https://github.com/lucko/fabric-permissions-api) on Fabric (both work with e.g. LuckPerms). Alternatively, set `use_native_fallback_permissions: true` to use vanilla operators instead.
 
 ## Commands & Permissions
 The plugin provides a few commands, to which access can be controlled using the following permissions:
